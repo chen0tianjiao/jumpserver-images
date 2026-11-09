@@ -1,5 +1,5 @@
 
-name: Download Images
+name: Download JumpServer Images
 
 on:
   workflow_dispatch:
@@ -8,16 +8,26 @@ jobs:
   images:
     runs-on: ubuntu-latest
     steps:
-      - name: Download and export
+      - name: Pull and export images
         run: |
-          docker pull --platform linux/amd64 postgres:16.9
-          docker pull --platform linux/amd64 redis:7.4.4
-          docker save -o postgres-16.9.tar postgres:16.9
-          docker save -o redis-7.4.4.tar redis:7.4.4
+          set -e
+          docker pull --platform linux/amd64 jumpserver/core:v5.1.1-ce
+          docker pull --platform linux/amd64 jumpserver/koko:v5.1.1-ce
+          docker pull --platform linux/amd64 jumpserver/chen:v5.1.1-ce
+          docker pull --platform linux/amd64 jumpserver/web:v5.1.1-ce
 
-      - name: Upload files
+          docker save -o jumpserver-core.tar jumpserver/core:v5.1.1-ce
+          docker save -o jumpserver-koko.tar jumpserver/koko:v5.1.1-ce
+          docker save -o jumpserver-chen.tar jumpserver/chen:v5.1.1-ce
+          docker save -o jumpserver-web.tar jumpserver/web:v5.1.1-ce
+
+          sha256sum *.tar > SHA256SUMS
+
+      - name: Upload images
         uses: actions/upload-artifact@v4
         with:
-          name: database-images
-          path: "*.tar"
+          name: jumpserver-v5.1.1-images
+          path: |
+            *.tar
+            SHA256SUMS
           retention-days: 7
